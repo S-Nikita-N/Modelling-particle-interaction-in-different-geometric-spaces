@@ -1,0 +1,29 @@
+function [xt,vt,isRebound_t] = billiard_boundary_conditions(x,v,n,radius,nb,xb,yb,rb,isRebound)
+    xt = x;
+    vt = v;
+    isRebound_t =isRebound;
+     for i=1:n
+         for j=1:nb
+             dx = xb(j)-xt(2*i-1);
+             dy = yb(j)-xt(2*i);
+             r = sqrt(dx^2+dy^2);
+             if radius(i) + rb(j) - r > 0 && ~isRebound_t(j,i)
+                cs = dx/r;
+                sn = dy/r;
+                An = [cs, -sn;sn, cs];
+                A = [cs, sn;-sn, cs];
+                Vn = A*[vt(2*i-1);vt(2*i)];
+%                 Xn = A*[xt(2*i-1);xt(2*i)];
+                Vn(1) = - Vn(1);
+%                 Xn(1) =  Xn(1) - (radius(i)+rb(j)-r);
+%                 X_temporary = num2cell(An*Xn);
+                V_temporary = num2cell(An*Vn);
+%                 [xt(2*i-1),xt(2*i)] = deal(X_temporary{:});
+                [vt(2*i-1),vt(2*i)] = deal(V_temporary{:});
+                isRebound_t(j,i)=1;
+             elseif radius(i) + rb(j) - r <= 0
+                isRebound_t(j,i) = 0;
+             end
+         end
+     end
+end
